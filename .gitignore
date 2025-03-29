@@ -175,3 +175,4 @@ cython_debug/
 .venv
 *.env
 !*example.env
+*all_tt_articles.csv
