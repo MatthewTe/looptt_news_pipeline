@@ -152,8 +152,9 @@ def extract_articles_display_page(
 
     # Link to next page:
     next_page_a_tag = soup.find("a", title="Go to next page", href=True)
-    
+
     import sys
+
     print(next_page_a_tag)
     sys.exit(0)
 

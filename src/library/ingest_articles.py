@@ -77,7 +77,10 @@ def insert_looptt_articles_posts_db(looptt_article: Message, secrets: Secrets) -
         logger.info(f"Inserted {result.rowcount} posts to core.source")
         return result.rowcount
 
-def insert_multiple_looptt_articles_posts_db(looptt_articles: list[Message], secrets: Secrets) -> int:
+
+def insert_multiple_looptt_articles_posts_db(
+    looptt_articles: list[Message], secrets: Secrets
+) -> int:
     psql_engine = sa.create_engine(secrets["psql_uri"])
     with psql_engine.connect() as conn, conn.begin():
         insert_query = sa.text(
@@ -131,7 +134,10 @@ def insert_article_text_content_db(text_content: Message, secrets: Secrets) -> i
         logger.info(f"Inserted {result.rowcount} posts to core.content")
         return result.rowcount
 
-def insert_multiple_article_text_content_db(text_contents: list[Message], secrets: Secrets) -> int:
+
+def insert_multiple_article_text_content_db(
+    text_contents: list[Message], secrets: Secrets
+) -> int:
     psql_engine = sa.create_engine(secrets["psql_uri"])
     with psql_engine.connect() as conn, conn.begin():
         insert_query = sa.text(
@@ -159,6 +165,7 @@ def insert_multiple_article_text_content_db(text_contents: list[Message], secret
 
         logger.info(f"Inserted {result.rowcount} posts to core.content")
         return result.rowcount
+
 
 def process_loop_page(config: LoopPageConfig):
 

@@ -5,7 +5,9 @@ from library.config import LoopPageConfig, Article, get_secrets
 parser = argparse.ArgumentParser()
 # parser.add_argument("config", help="The full path to the config json file used to run the pipeline")
 parser.add_argument(
-    "--env_file", "-e", help="The path to the environment file used to load all of the secrets"
+    "--env_file",
+    "-e",
+    help="The path to the environment file used to load all of the secrets",
 )
 
 args = parser.parse_args()
