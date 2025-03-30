@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     config: LoopPageConfig = {
         "query_param_str": "?page=0",
-        "article_category": "looptt-crime",
+        "article_category": "trinidad-tobago",
         "db_category": "crime",
         "secrets": get_secrets(args.env_file),
     }

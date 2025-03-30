@@ -181,7 +181,7 @@ def process_loop_page(config: LoopPageConfig):
         },
     ]
 
-    base_url = f"https://tt.loopnews.com/category/{article_category}"
+    base_url = f"https://tt.loopnews.com/news/{article_category}"
     article_base_url = "https://tt.loopnews.com"
     query_params = parse_qs(query_param_str.lstrip("?"))
 
@@ -191,6 +191,9 @@ def process_loop_page(config: LoopPageConfig):
     articles_response: requests.Response = requests.get(
         base_url, params=query_params, headers=random.choice(headers_lst)
     )
+    print(base_url)
+    print(articles_response.url)
+
     articles_response.raise_for_status()
     logger.info(f"Article thumbnail http response: {articles_response.status_code}")
 
