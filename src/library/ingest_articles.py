@@ -77,6 +77,33 @@ def insert_looptt_articles_posts_db(looptt_article: Message, secrets: Secrets) -
         logger.info(f"Inserted {result.rowcount} posts to core.source")
         return result.rowcount
 
+def insert_multiple_looptt_articles_posts_db(looptt_articles: list[Message], secrets: Secrets) -> int:
+    psql_engine = sa.create_engine(secrets["psql_uri"])
+    with psql_engine.connect() as conn, conn.begin():
+        insert_query = sa.text(
+            """
+            INSERT INTO core.source (id, type, created_date, fields)
+            VALUES (:id, :type, :created_date, :fields);
+            """
+        )
+
+        posts_to_insert = [
+            {
+                "id": article.id,
+                "type": article.type,
+                "created_date": datetime.fromtimestamp(
+                    article.created_date, tz=timezone.utc
+                ),
+                "fields": json.dumps(MessageToDict(article.fields)),
+            }
+            for article in looptt_articles
+        ]
+
+        result = conn.execute(insert_query, posts_to_insert)
+
+        logger.info(f"Inserted {result.rowcount} posts to core.source")
+        return result.rowcount
+
 
 def insert_article_text_content_db(text_content: Message, secrets: Secrets) -> int:
     psql_engine = sa.create_engine(secrets["psql_uri"])
@@ -104,6 +131,34 @@ def insert_article_text_content_db(text_content: Message, secrets: Secrets) -> i
         logger.info(f"Inserted {result.rowcount} posts to core.content")
         return result.rowcount
 
+def insert_multiple_article_text_content_db(text_contents: list[Message], secrets: Secrets) -> int:
+    psql_engine = sa.create_engine(secrets["psql_uri"])
+    with psql_engine.connect() as conn, conn.begin():
+        insert_query = sa.text(
+            """
+            INSERT INTO core.content (id, source, type, created_date, storage_path, fields)
+            VALUES (:id, :source, :type, :created_date, :storage_path, :fields);
+            """
+        )
+
+        posts_to_insert = [
+            {
+                "id": content.id,
+                "source": content.source,
+                "type": content.type,
+                "created_date": datetime.fromtimestamp(
+                    content.created_date, tz=timezone.utc
+                ),
+                "storage_path": content.storage_path,
+                "fields": json.dumps(MessageToDict(content.fields)),
+            }
+            for content in text_contents
+        ]
+
+        result = conn.execute(insert_query, posts_to_insert)
+
+        logger.info(f"Inserted {result.rowcount} posts to core.content")
+        return result.rowcount
 
 def process_loop_page(config: LoopPageConfig):
 

@@ -7,7 +7,11 @@ from library.config import Secrets, get_secrets
 from datetime import datetime, timezone
 from google.protobuf.message import Message
 
-from library.ingest_articles import get_unique_articles, insert_looptt_articles_posts_db, insert_article_text_content_db
+from library.ingest_articles import (
+    get_unique_articles, 
+    insert_multiple_looptt_articles_posts_db, 
+    insert_multiple_article_text_content_db
+)
 from library.protobuff_types.trinidad_tobago import looptt_articles_pb2
 from library.protobuff_types import core_content_pb2
 
@@ -49,7 +53,7 @@ if __name__ == "__main__":
         )
 
         loop_tt_text_content = looptt_articles_pb2.ArticlesTextContent(
-            id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{row['title']}{old_formatted_published_date.replace(tzinfo=timezone.utc).timestamp()}")),
+            id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{row['source']}{row['url']}")),
             source=row['id'],
             type=core_content_pb2.CoreContentTypes.TEXT_CONTENT,
             created_date=old_formatted_published_date.replace(tzinfo=timezone.utc).timestamp(),
@@ -82,13 +86,13 @@ if __name__ == "__main__":
     ]
     logger.info(f"Found {len(unique_articles_to_insert)} unique articles that are not in the postgres db")
 
-    for article_to_insert in unique_articles_to_insert:
-        assert insert_looptt_articles_posts_db(
-            looptt_article=article_to_insert['article'],
-            secrets=secrets
-        ) == 1, logger.error(f"Error in uploading article {article_to_insert['article'].title}")
-        
-        assert insert_article_text_content_db(
-            text_content=article_to_insert['text_content'],
-            secrets=secrets
-        ) == 1, logger.error(f"Error in inserting raw text content for {article_to_insert['text_content'].fields['title']}")
+    unique_articles_messages_to_insert: list[Message] = [content['article'] for content in unique_articles_to_insert]
+    unique_text_content_messages_to_insert: list[Message] = [content['text_content'] for content in unique_articles_to_insert]
+
+    logger.info(f"Trying to insert {len(unique_articles_messages_to_insert)} loop tt articles into the database")
+    inserted_articles = insert_multiple_looptt_articles_posts_db(unique_articles_messages_to_insert, secrets)
+    logger.info(f"Inserted {inserted_articles} articles into the database")
+
+    logger.info(f"Trying to insert {len(unique_text_content_messages_to_insert)} text content into the database")
+    inserted_text_content = insert_multiple_article_text_content_db(unique_text_content_messages_to_insert, secrets)
+    logger.info(f"Inserted {inserted_text_content} text content into the database")
